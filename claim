@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Claim — Farcaster QR</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 30px; text-align:center; background:#fafbfd; }
+    .card { display:inline-block; padding:20px; border-radius:12px; box-shadow:0 6px 20px rgba(20,30,60,0.06); background:white; }
+    h1 { margin:0 0 6px; }
+    p { margin:6px 0; color:#555; }
+    a.btn { display:inline-block; margin-top:12px; padding:10px 16px; background:#3358ff; color:#fff; border-radius:8px; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="title">Welcome</h1>
+    <p id="desc">Loading...</p>
+    <a id="action" class="btn" href="#">Refresh</a>
+  </div>
+
+  <script>
+    // پارس کردن user از query string
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    const user = getQueryParam('user') || getQueryParam('u') || 'unknown';
+    document.getElementById('title').textContent = user === 'unknown' ? 'No user specified' : `Welcome @${user} 👋`;
+    if (user === 'unknown') {
+      document.getElementById('desc').textContent = 'This claim page expects ?user=USERNAME in the URL.';
+      document.getElementById('action').textContent = 'Back';
+      document.getElementById('action').href = '/';
+    } else {
+      document.getElementById('desc').textContent = `This is the claim page for ${user}. Soon you will be able to mint your QR NFT from here.`;
+      // لینک اختیاری برای mint (بعداً آن را به قرارداد متصل می‌کنیم)
+      document.getElementById('action').textContent = 'Prepare to Claim';
+      // می‌تونیم صفحه mint را بعداً به /mint?user=... هدایت کنیم
+      document.getElementById('action').href = `/mint.html?user=${encodeURIComponent(user)}`;
+    }
+  </script>
+</body>
+</html>
