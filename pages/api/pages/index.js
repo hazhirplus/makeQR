@@ -1,76 +1,63 @@
-import { useState } from "react";
-import { ethers } from "ethers";
-
-const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
-const CONTRACT_ABI = [
-  "function mint(string tokenURI) payable",
-  "function priceWei() view returns (uint256)"
-];
-
-export default function Home() {
-  const [status, setStatus] = useState("");
-  const [addr, setAddr] = useState("");
-  const [tx, setTx] = useState("");
-
-  async function connect() {
-    if (!window.ethereum) return alert("Install MetaMask or Coinbase Wallet");
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = await provider.getSigner();
-    const a = await signer.getAddress();
-    setAddr(a);
-  }
-
-  async function mintNFT() {
-    if (!addr) return alert("Connect wallet first");
-
-    setStatus("Generating metadata...");
-    const res = await fetch("/api/generate-metadata", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ address: addr })
-    });
-    const { tokenURI } = await res.json();
-
-    setStatus("Minting... please confirm transaction");
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-    // حدود ۳ سنت به Base تبدیل کن (تقریباً 0.00002 ETH)
-    const value = ethers.parseEther("0.00002");
-
-    try {
-      const tx = await contract.mint(tokenURI, { value });
-      setTx(tx.hash);
-      setStatus("Transaction sent: " + tx.hash);
-      await tx.wait();
-      setStatus("✅ Mint complete!");
-    } catch (e) {
-      console.error(e);
-      setStatus("❌ Error: " + e.message);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farcaster QR Claim</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      text-align: center;
+      padding: 40px;
+      background: #f5f7fa;
     }
-  }
+    h1 {
+      color: #333;
+    }
+    #qr {
+      margin-top: 30px;
+    }
+    .input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 220px;
+      margin-bottom: 10px;
+    }
+    button {
+      background-color: #4a61ff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #384bd6;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎟️ Farcaster QR Generator</h1>
+  <p>Enter your Farcaster username:</p>
+  <input id="username" class="input" placeholder="e.g. shahin" />
+  <br>
+  <button onclick="generateQR()">Generate QR</button>
 
-  return (
-    <div style={{ padding: 20, fontFamily: "sans-serif" }}>
-      <h2>Farcaster QR NFT</h2>
-      {!addr ? (
-        <button onClick={connect}>Connect Wallet</button>
-      ) : (
-        <p>Connected: {addr}</p>
-      )}
-      <button onClick={mintNFT} disabled={!addr}>
-        Mint My QR
-      </button>
-      <p>{status}</p>
-      {tx && (
-        <p>
-          <a href={`https://base.blockscout.com/tx/${tx}`} target="_blank" rel="noreferrer">
-            View on Blockscout
-          </a>
-        </p>
-      )}
-    </div>
-  );
-}
+  <div id="qr"></div>
+
+  <script>
+    function generateQR() {
+      const username = document.getElementById('username').value.trim();
+      if (!username) return alert('Please enter your username');
+      const claimURL = `https://vercel.com/shahinhizhas-projects/make-qr=${username}`;
+      const qrAPI = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(claimURL)}&size=250x250`;
+      document.getElementById('qr').innerHTML = `
+        <h3>Your QR Code:</h3>
+        <img src="${qrAPI}" alt="QR Code for ${username}" />
+        <p><a href="${claimURL}" target="_blank">${claimURL}</a></p>
+      `;
+    }
+  </script>
+</body>
+</html>
