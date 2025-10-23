@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Mint App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>QR Mint Demo</h1>
+  <input type="text" id="userId" placeholder="Enter your ID" />
+  <button id="mintBtn">Mint QR</button>
+  <div id="qrCode"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
